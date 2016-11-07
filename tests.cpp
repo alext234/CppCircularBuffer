@@ -59,7 +59,7 @@ TEST_F (TestCircularBuf, PushAndPopCircular) {
     }
 
     for (int v=1; v<=MAX_SIZE+5; v++) {
-        cbuf.push_back (1+v);     // pass by rvalue ?
+        cbuf.push_back (1+v);     // pass by rvalue 
     }
     
     ASSERT_THAT(cbuf.size(), Eq(MAX_SIZE));

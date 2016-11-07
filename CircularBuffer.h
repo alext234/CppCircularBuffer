@@ -14,19 +14,18 @@ public:
     
     void push_back (T&& v) {
         items[_backIdx] = std::forward<T>(v);
-        if (_size==capacity) pop_front();
-        if (_size < capacity) ++_size;
-        _backIdx = (_backIdx+1) % capacity;
+        push_aux_ops();
     }
 
     void push_back (const T& v) {
         items[_backIdx] = v;
-        if (_size==capacity) pop_front();
-        if (_size < capacity) ++_size;
-        _backIdx = (_backIdx+1) % capacity;
+        push_aux_ops();
 
     }
     
+    void push_back_reuse (void) {
+        push_aux_ops();
+    }
 
     T& front (void) {
         return items[_frontIdx];        
@@ -37,7 +36,11 @@ public:
     }
 
 private:
-
+    inline void push_aux_ops (void) {
+        if (_size==capacity) pop_front();
+        if (_size < capacity) ++_size;
+        _backIdx = (_backIdx+1) % capacity;
+    }
 
     T *items; 
     size_t _size=0;
