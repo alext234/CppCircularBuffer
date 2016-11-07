@@ -45,9 +45,33 @@ TEST_F (TestCircularBuf, PushAndPop) {
 
 }
 
+TEST_F (TestCircularBuf, PushAndPopCircular) {
 
-TEST_F (TestCircularBuf, PushAndPopWithObjects) {
+    for (int v=1; v<=MAX_SIZE+5; v++) {
+        cbuf.push_back (v);     // pass by reference const
+    }
+
+    ASSERT_THAT(cbuf.size(), Eq(MAX_SIZE));
+    
+    for (int v=1+5; v<=MAX_SIZE+5; v++) {
+        ASSERT_THAT(cbuf.front(), Eq(v));
+        cbuf.pop_front();    
+    }
+
+    for (int v=1; v<=MAX_SIZE+5; v++) {
+        cbuf.push_back (1+v);     // pass by rvalue ?
+    }
+    
+    ASSERT_THAT(cbuf.size(), Eq(MAX_SIZE));
+    
+    for (int v=1+1+5; v<=MAX_SIZE+5; v++) {
+        ASSERT_THAT(cbuf.front(), Eq(v));
+        cbuf.pop_front();    
+    }
+
+
 }
+
 
 
 
