@@ -72,7 +72,43 @@ TEST_F (TestCircularBuf, PushAndPopCircular) {
 
 }
 
+class A{
+public:
+    A()  {++_instances;}
+    ~A() {--_instances;}
+    A(const A& other) {++_copy_ops;}
+    A& operator= (const A& other) { ++_copy_ops; return *this;}
+    
 
+    static int _instances;
+    static int _copy_ops;
+};
+int A::_instances =0;
+int A::_copy_ops = 0;
+
+TEST_F (TestCircularBuf, PushAndPopObject) {
+    ::A::_copy_ops =0;
+    ::A::_instances=0;
+
+    CircularBuffer<::A,10> bufA;
+
+    ASSERT_THAT(A::_instances,10);
+
+    bufA.push_back_reuse(); // just reuse the same object; don't make new one
+    ASSERT_THAT(A::_instances,10);
+    ASSERT_THAT(A::_copy_ops,0);
+   
+    ::A a;
+
+    bufA.push_back(std::move(a));
+    ASSERT_THAT(A::_copy_ops,1);
+
+    ::A::_copy_ops =0;
+    bufA.push_back(::A());
+    ASSERT_THAT(A::_copy_ops,1);
+
+
+}
 
 
 int main(int argc, char *argv[])
