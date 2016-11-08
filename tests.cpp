@@ -79,13 +79,38 @@ TEST_F(TestCircularBuf, TestIteratorBeginAndEnd) {
     cbuf.push_back(2);
     cbuf.push_back(3);
    
-    //auto it = cbuf.begin();
+    auto it = cbuf.begin();
 
-    //ASSERT_THAT(*it, Eq(1));
+    ASSERT_THAT(*it, Eq(1));
+    ++it;
+    ASSERT_THAT(*it, Eq(2));
+    it++;
+    ASSERT_THAT(*it, Eq(3));
+
+    --it;
+    ASSERT_THAT(*it, Eq(2));
+    it--;
+    ASSERT_THAT(*it, Eq(1));
 
 
 }
+TEST_F(TestCircularBuf, TestIteratorLoopSimple) {
 
+    cbuf.push_back(1);
+    cbuf.push_back(2);
+    cbuf.push_back(3);
+    
+    int val=1;
+    for (auto it = cbuf.begin(); it!=cbuf.end(); ++it) {
+       ASSERT_THAT(*it, Eq(val++));
+    }
+
+    val=1;
+    for (auto it = cbuf.cbegin(); it!=cbuf.cend(); ++it) {
+       ASSERT_THAT(*it, Eq(val++));
+    }
+
+}
 
 class A{
 public:
