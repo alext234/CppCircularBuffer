@@ -1,6 +1,7 @@
 #include "gmock/gmock.h"
 #include "CircularBuffer.h"
 #include <thread>
+#include <chrono>
 
 using namespace std;
 using namespace testing;
@@ -8,7 +9,7 @@ using namespace testing;
 class TestCircularBufThread: public Test {
 
 public:
-    enum {MAX_SIZE=100000};
+    enum {MAX_SIZE=10000};
     CircularBuffer<int, MAX_SIZE> cbuf; 
 
 };
@@ -16,31 +17,36 @@ public:
 TEST_F (TestCircularBufThread, Producer1Consumer1) {
 
 
-    cbuf.push_back(0);
+    const long START_VAL=10000;
+    cbuf.push_back(START_VAL);
     bool stop=false;
 
     thread  producer ([&stop, this](){
-        for (long i=1; i<100000000; ++i) {
+        for (long i=START_VAL+1; i<START_VAL+999999; ++i) {
             cbuf.push_back (i);
-            for (long j=1; j<5; ++j); // small delay
             
 
         }
         stop=true;
     }
     );
-    thread  consumer ([&stop, this](){
+    std::this_thread::sleep_for(100ms);
+   
         
-        auto it = cbuf.cbegin();
-        long prev_v = *it;
-        long v;
-        while (!stop && it!=cbuf.cend()) {
-            v = *(++it);
-            ASSERT_THAT(v, Eq(prev_v+1));
-            prev_v = v;
-        }
+    auto it = cbuf.cbegin();
+    volatile long prev_v = *it;
+    volatile long v;
+    volatile long v1;
+    while(cbuf.empty());
+    while (!stop ) {
+        ++it;
+        while (it==cbuf.cend());
+        ++prev_v;
+        v = *(it);
+        EXPECT_THAT(v, Eq(prev_v));
+        v1 = *(it);
+        ASSERT_THAT(v1, Eq(prev_v));
+        prev_v = v;
     }
-    );
     producer.join();
-    consumer.join();
 }

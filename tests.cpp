@@ -114,13 +114,20 @@ TEST_F(TestCircularBuf, TestIteratorLoopSimple) {
 TEST_F(TestCircularBuf, TestIteratorLoopCircular) {
 
     
-    for (int v=1; v<=MAX_SIZE+5; v++) {
+    for (int v=1; v<=MAX_SIZE+5; ++v) {
         cbuf.push_back (v);     // pass by reference const
     }
 
     int val=1+5;
     for (auto it = cbuf.begin(); it!=cbuf.end(); ++it) {
        ASSERT_THAT(*it, Eq(val++));
+    }
+
+    val=1+5;
+    for (auto it=cbuf.begin(); val<=MAX_SIZE+5; ++val){
+    
+       ASSERT_THAT(*it, Eq(val));
+       ++it;
     }
 
     val=1+5;

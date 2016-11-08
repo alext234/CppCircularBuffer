@@ -1,7 +1,7 @@
 #ifndef __CIRCULAR_BUFFER__
 #define __CIRCULAR_BUFFER__
 #include <iterator>
-
+#include <mutex>
 template<typename T, size_t capacity>
 class CircularBuffer;
 
@@ -13,6 +13,7 @@ public:
 
     CircularBufferIterator_base(CircularBuffer<T,capacity>& cbuf,size_t idx) : _cbuf{cbuf},_idx{idx}  {    }
     T& operator*() { 
+        std::lock_guard<std::mutex> lock(_cbuf.gMutex);
         return _cbuf.items[_idx];
     }    
     CircularBufferIterator_base& operator++()  {// prefix  
@@ -50,9 +51,11 @@ class CircularBufferIterator_const: public std::iterator<std::random_access_iter
 
 public:
 
-    CircularBufferIterator_const(const CircularBuffer<T,capacity>& cbuf,size_t idx) : _cbuf{cbuf},_idx{idx}  {    }
+    CircularBufferIterator_const(CircularBuffer<T,capacity>& cbuf,size_t idx) : _cbuf{cbuf},_idx{idx}  {    }
     const T& operator*() { 
-        return _cbuf.items[_idx];
+        std::lock_guard<std::mutex> lock(_cbuf.gMutex);
+        T &retVal =  _cbuf.items[_idx];
+        return retVal;
     }    
     CircularBufferIterator_const& operator++()  {// prefix  
         _idx=(_idx+1) % capacity; return *this;
@@ -79,7 +82,7 @@ public:
     friend bool operator!=(const CircularBufferIterator_const<T2,capacity2>& i1, const CircularBufferIterator_const<T2,capacity2>& i2) ;
 protected:
 
-    const CircularBuffer<T,capacity>& _cbuf;
+    CircularBuffer<T,capacity>& _cbuf;
     size_t _idx;
 };
 
@@ -100,17 +103,20 @@ public:
     bool empty() const {        return _size==0;    }
     
     void push_back (T&& v) {
+        std::lock_guard<std::mutex> lock(gMutex);
         items[_backIdx] = std::forward<T>(v);
         push_aux_ops();
     }
 
     void push_back (const T& v) {
+        std::lock_guard<std::mutex> lock(gMutex);
         items[_backIdx] = v;
         push_aux_ops();
 
     }
     
     void push_back_reuse (void) {
+        std::lock_guard<std::mutex> lock(gMutex);
         push_aux_ops();
     }
 
@@ -137,7 +143,8 @@ private:
         _backIdx = (_backIdx+1) % capacity;
     }
 
-    T *items; 
+    T *items;
+    std::mutex gMutex;
     size_t _size=0;
     size_t _backIdx=0;
     size_t _frontIdx=0;
