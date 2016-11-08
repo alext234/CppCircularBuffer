@@ -45,6 +45,43 @@ protected:
 };
 
 
+template<typename T, size_t capacity>
+class CircularBufferIterator_const: public std::iterator<std::random_access_iterator_tag, T>{
+
+public:
+
+    CircularBufferIterator_const(const CircularBuffer<T,capacity>& cbuf,size_t idx) : _cbuf{cbuf},_idx{idx}  {    }
+    const T& operator*() { 
+        return _cbuf.items[_idx];
+    }    
+    CircularBufferIterator_const& operator++()  {// prefix  
+        _idx=(_idx+1) % capacity; return *this;
+    }
+    CircularBufferIterator_const operator++(int)  {// postfix
+        CircularBufferIterator_const aCopy(*this);
+
+        _idx=(_idx+1) % capacity; 
+        return aCopy;
+    }
+    CircularBufferIterator_const& operator--()  {// prefix  
+        if (_idx==0) _idx=capacity-1; else  _idx--;
+        return *this;
+    }
+    CircularBufferIterator_const operator--(int)  {// postfix
+        CircularBufferIterator_const aCopy(*this);
+        if (_idx==0) _idx=capacity-1; else  _idx--;
+        return aCopy;
+    }
+
+    template<typename T2, size_t capacity2>
+    friend bool operator==(const CircularBufferIterator_const<T2,capacity2>& i1, const CircularBufferIterator_const<T2,capacity2>& i2) ;
+    template<typename T2, size_t capacity2>
+    friend bool operator!=(const CircularBufferIterator_const<T2,capacity2>& i1, const CircularBufferIterator_const<T2,capacity2>& i2) ;
+protected:
+
+    const CircularBuffer<T,capacity>& _cbuf;
+    size_t _idx;
+};
 
 template <typename T, size_t capacity>
 class CircularBuffer {
@@ -53,7 +90,7 @@ public:
 
 
     typedef CircularBufferIterator_base<T,capacity>  CircularBufferIterator;
-    typedef CircularBufferIterator_base<T,capacity>const_CircularBufferIterator;
+    typedef CircularBufferIterator_const<T,capacity>    const_CircularBufferIterator;
 
     CircularBuffer(): items{new T[capacity]} {}
     ~CircularBuffer() { delete[] items;}
@@ -89,8 +126,8 @@ public:
     CircularBufferIterator begin()  {    return CircularBufferIterator{*this,_frontIdx}; }
     CircularBufferIterator end()  {    return CircularBufferIterator{*this,_backIdx}; }
     
-    CircularBufferIterator cbegin()  {    return const_CircularBufferIterator{*this,_frontIdx}; }
-    CircularBufferIterator cend()  {    return const_CircularBufferIterator{*this,_backIdx}; }
+    const_CircularBufferIterator cbegin()  {    return const_CircularBufferIterator{*this,_frontIdx}; }
+    const_CircularBufferIterator cend()  {    return const_CircularBufferIterator{*this,_backIdx}; }
 private:
     inline void push_aux_ops (void) {
         if (_size==capacity) {
@@ -106,6 +143,7 @@ private:
     size_t _frontIdx=0;
     
     friend class CircularBufferIterator_base<T,capacity>;
+    friend class CircularBufferIterator_const<T,capacity>;
    
         
 };
@@ -122,4 +160,14 @@ bool operator!=(const CircularBufferIterator_base<T2,capacity2>& i1, const Circu
     return i1._idx != i2._idx;
 }
 
+template <typename T2, size_t capacity2>
+bool operator==(const CircularBufferIterator_const<T2,capacity2>& i1, const CircularBufferIterator_const<T2,capacity2>& i2) {
+    return i1._idx == i2._idx;
+}
+
+
+template <typename T2, size_t capacity2>
+bool operator!=(const CircularBufferIterator_const<T2,capacity2>& i1, const CircularBufferIterator_const<T2,capacity2>& i2) {
+    return i1._idx != i2._idx;
+}
 #endif // __CIRCULAR_BUFFER__

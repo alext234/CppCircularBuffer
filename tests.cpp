@@ -125,7 +125,7 @@ TEST_F(TestCircularBuf, TestIteratorLoopCircular) {
 
     val=1+5;
     for (auto it = cbuf.cbegin(); it!=cbuf.cend(); ++it) {
-       ASSERT_THAT(*it, Eq(val++));
+       ASSERT_THAT(*it, Eq(val++));      
     }
 
 }
