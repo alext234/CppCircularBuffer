@@ -36,8 +36,10 @@ TEST_F (TestCircularBuf, PushAndPop) {
 
     ASSERT_THAT (cbuf.front(), Eq( 1));
     cbuf.pop_front();
+    ASSERT_THAT (cbuf.size(), Eq(size_t( 2)));
     ASSERT_THAT (cbuf.front(), Eq( 2));
     cbuf.pop_front();
+    ASSERT_THAT (cbuf.size(), Eq(size_t( 1)));
     ASSERT_THAT (cbuf.front(), Eq( 3));
     cbuf.pop_front();
 
@@ -71,6 +73,19 @@ TEST_F (TestCircularBuf, PushAndPopCircular) {
 
 
 }
+
+TEST_F(TestCircularBuf, TestIteratorBeginAndEnd) {
+    cbuf.push_back(1);
+    cbuf.push_back(2);
+    cbuf.push_back(3);
+   
+    //auto it = cbuf.begin();
+
+    //ASSERT_THAT(*it, Eq(1));
+
+
+}
+
 
 class A{
 public:
