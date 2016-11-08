@@ -9,7 +9,7 @@ link_directories(${GOOGLETEST}/build/googlemock ${GOOGLETEST}/build/googlemock/g
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++1y -Wall -Wextra -Wno-unused-parameter")
 
 
-add_executable(runtests  tests.cpp)
+add_executable(runtests  tests.cpp tests_thread.cpp)
 target_link_libraries(runtests gmock)
 target_link_libraries(runtests gtest)
 target_link_libraries(runtests pthread)
