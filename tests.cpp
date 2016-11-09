@@ -36,8 +36,10 @@ TEST_F (TestCircularBuf, PushAndPop) {
 
     ASSERT_THAT (cbuf.front(), Eq( 1));
     cbuf.pop_front();
+    ASSERT_THAT (cbuf.size(), Eq(size_t( 2)));
     ASSERT_THAT (cbuf.front(), Eq( 2));
     cbuf.pop_front();
+    ASSERT_THAT (cbuf.size(), Eq(size_t( 1)));
     ASSERT_THAT (cbuf.front(), Eq( 3));
     cbuf.pop_front();
 
@@ -69,6 +71,69 @@ TEST_F (TestCircularBuf, PushAndPopCircular) {
         cbuf.pop_front();    
     }
 
+
+}
+
+TEST_F(TestCircularBuf, TestIteratorBeginAndEnd) {
+    cbuf.push_back(1);
+    cbuf.push_back(2);
+    cbuf.push_back(3);
+   
+    auto it = cbuf.begin();
+
+    ASSERT_THAT(*it, Eq(1));
+    ++it;
+    ASSERT_THAT(*it, Eq(2));
+    it++;
+    ASSERT_THAT(*it, Eq(3));
+
+    --it;
+    ASSERT_THAT(*it, Eq(2));
+    it--;
+    ASSERT_THAT(*it, Eq(1));
+
+
+}
+TEST_F(TestCircularBuf, TestIteratorLoopSimple) {
+
+    cbuf.push_back(1);
+    cbuf.push_back(2);
+    cbuf.push_back(3);
+    
+    int val=1;
+    for (auto it = cbuf.begin(); it!=cbuf.end(); ++it) {
+       ASSERT_THAT(*it, Eq(val++));
+    }
+
+    val=1;
+    for (auto it = cbuf.cbegin(); it!=cbuf.cend(); ++it) {
+       ASSERT_THAT(*it, Eq(val++));
+    }
+
+}
+TEST_F(TestCircularBuf, TestIteratorLoopCircular) {
+
+    
+    for (int v=1; v<=MAX_SIZE+5; ++v) {
+        cbuf.push_back (v);     // pass by reference const
+    }
+
+    int val=1+5;
+    for (auto it = cbuf.begin(); it!=cbuf.end(); ++it) {
+       ASSERT_THAT(*it, Eq(val++));
+    }
+
+    val=1+5;
+    for (auto it=cbuf.begin(); val<=MAX_SIZE+5; ++val){
+    
+       ASSERT_THAT(*it, Eq(val));
+       ++it;
+    }
+
+    val=1+5;
+    for (auto it = cbuf.cbegin(); it!=cbuf.cend(); ++it) {
+       ASSERT_THAT(*it, Eq(val++));      
+    }
 
 }
 
@@ -109,6 +174,7 @@ TEST_F (TestCircularBuf, PushAndPopObject) {
 
 
 }
+
 
 
 int main(int argc, char *argv[])
